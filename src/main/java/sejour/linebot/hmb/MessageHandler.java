@@ -49,10 +49,10 @@ public class MessageHandler {
                     hamimojiWriter.write(text, out, defaultColumnNumber);
                 }
 
+                System.out.println("[SUCCESS MAKING] " + outFileName);
                 String imageUrl = madeUrlBase + "/" + outFileName;
-                System.out.println("[SUCCESS MAKING] " + imageUrl);
                 return Arrays.asList(
-                        new ImageMessage(madeUrlBase, madeUrlBase),
+                        new ImageMessage(imageUrl, imageUrl),
                         new TextMessage(imageUrl)
                 );
             }
