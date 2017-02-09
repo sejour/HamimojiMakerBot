@@ -10,14 +10,11 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import sejour.linebot.hmb.hamimoji.HamimojiWriter;
+import sejour.linebot.hmb.service.HamimojiMakerService;
 
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 
 /**
  * Message handler
@@ -26,16 +23,7 @@ import java.util.UUID;
 public class MessageHandler {
 
     @Autowired
-    private HamimojiWriter hamimojiWriter;
-
-    @Value("${sejour.hmb.madeUrlBase}")
-    private String madeUrlBase;
-
-    @Value("${sejour.hmb.saveDirectory}")
-    private String saveDirectory;
-
-    @Value("${sejour.hmb.defaultColumnNumber}")
-    private int defaultColumnNumber;
+    private HamimojiMakerService hamimojiMakerService;
 
     @EventMapping
     public List<Message> handleTextMessageEvent(MessageEvent event) {
@@ -43,14 +31,8 @@ public class MessageHandler {
             MessageContent messageContent = event.getMessage();
             if (messageContent instanceof TextMessageContent) {
                 String text = ((TextMessageContent) messageContent).getText();
-                String outFileName = UUID.randomUUID().toString() + ".gif";
+                String imageUrl = hamimojiMakerService.make(text, event.getSource().getSenderId());
 
-                try (FileOutputStream out = new FileOutputStream(saveDirectory + "/" + outFileName)) {
-                    hamimojiWriter.write(text, out, defaultColumnNumber);
-                }
-
-                System.out.println("[SUCCESS MAKING] " + outFileName);
-                String imageUrl = madeUrlBase + "/" + outFileName;
                 return Arrays.asList(
                         new ImageMessage(imageUrl, imageUrl),
                         new TextMessage(imageUrl)
@@ -65,7 +47,7 @@ public class MessageHandler {
         return handleDefaultMessageEvent(event);
     }
 
-    Random random = new Random();
+    private Random random = new Random();
 
     @EventMapping
     public List<Message> handleDefaultMessageEvent(Event event) {
