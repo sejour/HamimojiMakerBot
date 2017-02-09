@@ -1,12 +1,17 @@
 package sejour.linebot.hmb.service;
 
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import sejour.linebot.hmb.domain.Resource;
 import sejour.linebot.hmb.hamimoji.HamimojiWriter;
+import sejour.linebot.hmb.mapper.ResourceMapper;
 
 import java.io.FileOutputStream;
-import java.util.UUID;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 @Service
 public class HamimojiMakerService {
@@ -23,17 +28,67 @@ public class HamimojiMakerService {
     @Value("${sejour.hmb.defaultColumnNumber}")
     private int defaultColumnNumber;
 
-    public String make(String text, String sender) throws Exception {
-        String outFileName = UUID.randomUUID().toString() + ".gif";
+    @Value("${sejour.hmb.resourceNameCharas}")
+    private String resourceNameCharas;
 
-        try (FileOutputStream out = new FileOutputStream(saveDirectory + "/" + outFileName)) {
+    @Value("${sejour.hmb.resourceNameLenght}")
+    private int resourceNameLength;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
+
+    private SecureRandom random;
+
+    public HamimojiMakerService() throws NoSuchAlgorithmException {
+        this.random = SecureRandom.getInstance("SHA1PRNG");
+    }
+
+    /**
+     * はみ文字画像を生成し、画像のURLを返す
+     * @param text 入力テキスト
+     * @param sender 送信ユーザID
+     * @return 生成された画像のURL
+     * @throws Exception
+     */
+    public String make(@NonNull String text, @NonNull String sender) throws Exception {
+        text = StringUtils.trimAllWhitespace(text);
+        if (text.isEmpty()) throw new Exception("Input text must not be empty or white space");
+
+        // リソースが既に存在すれば再利用
+        Resource resource = resourceMapper.selectBySenderAndText(sender, text);
+        if (resource != null) {
+            return resource.getUrl();
+        }
+
+        String resourceName = generateResourceName();
+        while (resourceMapper.nameIsUsed(resourceName)) {
+            resourceName = generateResourceName();
+        }
+
+        String fileName = resourceName + ".gif";
+
+        // はみ文字を生成してGIFをストレージに保存
+        try (FileOutputStream out = new FileOutputStream(saveDirectory + "/" + fileName)) {
             hamimojiWriter.write(text, out, defaultColumnNumber);
         }
 
-        System.out.println("[SUCCESS MAKING] " + outFileName);
-        String imageUrl = madeUrlBase + "/" + outFileName;
+        String imageUrl = madeUrlBase + "/" + fileName;
+
+        // リソース登録
+        resourceMapper.insert(new Resource(resourceName, sender, text, imageUrl));
 
         return imageUrl;
     }
+
+    private String generateResourceName() {
+        StringBuilder builder = new StringBuilder();
+
+        for (int i = 0; i < resourceNameLength; ++i) {
+            builder.append(resourceNameCharas.charAt(random.nextInt(resourceNameCharas.length())));
+        }
+
+        return builder.toString();
+    }
+
 
 }
