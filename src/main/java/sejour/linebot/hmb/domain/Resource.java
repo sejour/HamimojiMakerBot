@@ -20,12 +20,15 @@ public class Resource {
 
     private String text;
 
+    private String textCode;
+
     private String url;
 
-    public Resource(String name, String sender, String text, String url) {
+    public Resource(String name, String sender, String text, String textCode, String url) {
         this.name = name;
         this.sender = sender;
         this.text = text;
+        this.textCode = textCode;
         this.url = url;
     }
 
