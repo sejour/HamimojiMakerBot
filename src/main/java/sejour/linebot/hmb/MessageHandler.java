@@ -10,6 +10,7 @@ import com.linecorp.bot.model.message.TextMessage;
 import com.linecorp.bot.spring.boot.annotation.EventMapping;
 import com.linecorp.bot.spring.boot.annotation.LineMessageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import sejour.linebot.hmb.error.UserErrorException;
 import sejour.linebot.hmb.service.HamimojiMakerService;
 
 import java.util.Arrays;
@@ -38,13 +39,16 @@ public class MessageHandler {
                         new TextMessage(imageUrl)
                 );
             }
+
+            return handleDefaultMessageEvent(event);
+        }
+        catch (UserErrorException e) {
+            return Arrays.asList(e.getReplyTextMessage());
         }
         catch (Throwable t) {
             System.out.println("[ERROR] " + t.getMessage());
             return Arrays.asList(new TextMessage("サーバーエラあ゛"));
         }
-
-        return handleDefaultMessageEvent(event);
     }
 
     private Random random = new Random();
