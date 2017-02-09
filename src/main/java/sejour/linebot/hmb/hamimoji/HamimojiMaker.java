@@ -1,5 +1,6 @@
 package sejour.linebot.hmb.hamimoji;
 
+import sejour.linebot.hmb.hamimoji.error.UnsupportedCharacterException;
 import sejour.linebot.hmb.hamimoji.sequence.ElementFrameSequence;
 
 import com.sun.imageio.plugins.gif.GIFImageMetadata;
@@ -82,7 +83,7 @@ public class HamimojiMaker {
                 .map(charFrame -> new IIOImage(charFrame.image, null, charFrame.metadata))
                 .collect(Collectors.toList());
 
-        if (frames == null || frames.isEmpty()) throw new Exception("The character is not correspond to hamimoji. [" + new String(Character.toChars(codePoint)) + "]");
+        if (frames == null || frames.isEmpty()) throw new UnsupportedCharacterException(codePoint);
 
         return frames;
     }
@@ -119,7 +120,7 @@ public class HamimojiMaker {
         for (int idxString = 0; idxString < charsLength; idxString = text.offsetByCodePoints(idxString, 1)) {
             int codePoint = text.codePointAt(idxString);
             ElementFrameSequence charFrameSequence = assets.get(codePoint);
-            if (charFrameSequence == null) throw new Exception("The character is not correspond to hamimoji. [" + new String(Character.toChars(codePoint)) + "]");
+            if (charFrameSequence == null) throw new UnsupportedCharacterException(codePoint);
             string.add(charFrameSequence);
         }
 
