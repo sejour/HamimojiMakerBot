@@ -22,7 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * はみ文字を生成するクラス
+ * はみ文字を生成するクラス(非推奨)
+ * HamimojiBuilderを使用してください。
  */
 public class HamimojiMaker {
 
