@@ -3,7 +3,7 @@ package sejour.linebot.hmb.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import sejour.linebot.hmb.hamimoji.HamimojiMaker;
+import sejour.linebot.hmb.hamimoji.HamimojiAssets;
 import sejour.linebot.hmb.hamimoji.HamimojiWriter;
 
 @Configuration
@@ -14,7 +14,7 @@ public class HamimojiMakerBotConfiguration {
 
     @Bean
     public HamimojiWriter hamimojiWriter() throws Exception {
-        return new HamimojiWriter(new HamimojiMaker(hamimojiAssetsDirectory));
+        return new HamimojiWriter(new HamimojiAssets(hamimojiAssetsDirectory));
     }
 
 }
