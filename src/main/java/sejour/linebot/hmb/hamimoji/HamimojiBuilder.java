@@ -54,6 +54,7 @@ public class HamimojiBuilder {
                 for (int point = 0; point < pointNumbers; ++point) {
                     // 現在のインデックスの文字フレームシーケンスを取得し、対象のフレーム画像を取り出す
                     charFrame = line.get(point).getFrame(frameIndex);
+                    if (charFrame == null) continue; /* スペース対応 */
                     meta = charFrame.metadata;
 
                     // 描画

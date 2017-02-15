@@ -5,6 +5,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import sejour.linebot.hmb.hamimoji.sequence.ElementFrameSequence;
+import sejour.linebot.hmb.hamimoji.sequence.WhiteSpaceFrameSequence;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,6 +25,10 @@ public class HamimojiAssets {
      * @throws Exception
      */
     public HamimojiAssets(String assetsDirectory) throws Exception {
+        // スペース対応
+        assets.put(" ".codePointAt(0), WhiteSpaceFrameSequence.INSTANCE);
+        assets.put("　".codePointAt(0), WhiteSpaceFrameSequence.INSTANCE);
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         Document document = documentBuilder.parse(assetsDirectory + "/hamimoji.xml");
