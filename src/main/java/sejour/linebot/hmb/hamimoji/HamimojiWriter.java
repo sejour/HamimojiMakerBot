@@ -12,10 +12,10 @@ import java.util.Iterator;
  */
 public class HamimojiWriter {
 
-    private final HamimojiMaker hamimojiMaker;
+    private final HamimojiAssets assets;
 
-    public HamimojiWriter(HamimojiMaker hamimojiMaker) {
-        this.hamimojiMaker = hamimojiMaker;
+    public HamimojiWriter(HamimojiAssets assets) {
+        this.assets = assets;
     }
 
     /**
@@ -36,6 +36,9 @@ public class HamimojiWriter {
      * @throws Exception
      */
     public void write(String text, OutputStream out, int columnNumbers) throws Exception {
+        // Letter/Builder生成
+        HamimojiBuilder builder = new HamimojiBuilder(new Letter(text, columnNumbers, assets));
+
         Iterator<ImageWriter> imageWriters = ImageIO.getImageWritersByFormatName("gif");
         if (!imageWriters.hasNext()) throw new Exception("No image writers.");
         ImageWriter writer = imageWriters.next();
@@ -44,7 +47,7 @@ public class HamimojiWriter {
             writer.setOutput(imageOutputStream);
             writer.prepareWriteSequence(null);
 
-            hamimojiMaker.build(text, columnNumbers).stream().forEachOrdered(frame -> {
+            builder.build().stream().forEachOrdered(frame -> {
                 try {
                     writer.writeToSequence(frame, null);
                 } catch (IOException e) {

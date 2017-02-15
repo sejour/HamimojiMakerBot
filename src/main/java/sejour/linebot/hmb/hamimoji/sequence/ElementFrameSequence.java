@@ -24,13 +24,13 @@ public abstract class ElementFrameSequence {
 
     public ElementFrameSequence(List<CharacterFrame> sequence) {
         this.sequence = sequence;
-        this.length = sequence.size();
+        this.length = sequence == null ? 0 : sequence.size();
     }
 
     public abstract CharacterFrame getFrame(int index);
 
     public Stream<CharacterFrame> stream() {
-        return sequence.stream();
+        return sequence == null ? null : sequence.stream();
     }
 
     public static ElementFrameSequence load(String imageFileName) throws Exception {
@@ -61,6 +61,10 @@ public abstract class ElementFrameSequence {
         }
 
         throw new Exception("Frame count of the character image is not correspond.");
+    }
+
+    public static boolean isWhiteSpace(ElementFrameSequence sequence) {
+        return sequence.sequence == null;
     }
 
 }
