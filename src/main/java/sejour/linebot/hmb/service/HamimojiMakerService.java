@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import sejour.linebot.hmb.domain.Resource;
+import sejour.linebot.hmb.error.UserErrorException;
 import sejour.linebot.hmb.hamimoji.HamimojiWriter;
 import sejour.linebot.hmb.mapper.ResourceMapper;
 
@@ -51,8 +52,9 @@ public class HamimojiMakerService {
      * @throws Exception
      */
     public String make(@NonNull String text, @NonNull String sender) throws Exception {
-        text = StringUtils.trimAllWhitespace(text);
-        if (text.isEmpty()) throw new Exception("Input text must not be empty or white space");
+        if (text.trim().isEmpty()) {
+            throw new UserErrorException("文字を入力してください。");
+        }
 
         String textCode = getTextCode(text);
 
