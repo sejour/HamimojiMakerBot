@@ -6,6 +6,7 @@ import lombok.NonNull;
 import sejour.linebot.hmb.error.UserErrorException;
 import sejour.linebot.hmb.hamimoji.error.UnsupportedCharacterException;
 import sejour.linebot.hmb.hamimoji.sequence.ElementFrameSequence;
+import sejour.linebot.hmb.hamimoji.sequence.WhiteSpaceFrameSequence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class Letter {
             if (charFrameSequence == null) throw new UnsupportedCharacterException(codePoint);
             line.add(charFrameSequence); /* 行に追加 */
             // set first character
-            if (firstCharacter == null) {
+            if (firstCharacter == null && !ElementFrameSequence.isWhiteSpace(charFrameSequence)) {
                 firstCharacter = charFrameSequence;
             }
         }
