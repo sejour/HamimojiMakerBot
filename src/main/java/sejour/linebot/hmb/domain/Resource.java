@@ -22,13 +22,16 @@ public class Resource {
 
     private String textCode;
 
+    private int columnNumber;
+
     private String url;
 
-    public Resource(String name, String sender, String text, String textCode, String url) {
+    public Resource(String name, String sender, String text, String textCode, int columnNumber, String url) {
         this.name = name;
         this.sender = sender;
         this.text = text;
         this.textCode = textCode;
+        this.columnNumber = columnNumber;
         this.url = url;
     }
 
