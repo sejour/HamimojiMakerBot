@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import sejour.linebot.hmb.domain.Resource;
+import sejour.linebot.hmb.domain.Room;
 import sejour.linebot.hmb.error.UserErrorException;
 import sejour.linebot.hmb.hamimoji.HamimojiWriter;
 import sejour.linebot.hmb.mapper.ResourceMapper;
+import sejour.linebot.hmb.mapper.RoomMapper;
 
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
@@ -36,6 +38,9 @@ public class HamimojiMakerService {
     private int resourceNameLength;
 
     @Autowired
+    private RoomMapper roomMapper;
+
+    @Autowired
     private ResourceMapper resourceMapper;
 
     private SecureRandom random;
@@ -56,10 +61,18 @@ public class HamimojiMakerService {
             throw new UserErrorException("文字を入力してください。");
         }
 
+        // カラム数を取得すためにRoomを取り出す
+        Room room = roomMapper.selectBySender(sender);
+        if (room == null) {
+            room = new Room(sender, defaultColumnNumber);
+            roomMapper.insert(room);
+        }
+
         String textCode = getTextCode(text);
+        int columnNumber = room.getColumnNumber();
 
         // リソースが既に存在すれば再利用
-        Resource resource = resourceMapper.selectBySenderAndText(sender, textCode);
+        Resource resource = resourceMapper.selectBySenderAndTextAndColumn(sender, textCode, columnNumber);
         if (resource != null) {
             return resource.getUrl();
         }
@@ -73,13 +86,13 @@ public class HamimojiMakerService {
 
         // はみ文字を生成してGIFをストレージに保存
         try (FileOutputStream out = new FileOutputStream(saveDirectory + "/" + fileName)) {
-            hamimojiWriter.write(text, out, defaultColumnNumber);
+            hamimojiWriter.write(text, out, columnNumber);
         }
 
         String imageUrl = madeUrlBase + "/" + fileName;
 
         // リソース登録
-        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, imageUrl));
+        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, columnNumber, imageUrl));
 
         return imageUrl;
     }
@@ -112,6 +125,12 @@ public class HamimojiMakerService {
         }
 
         return builder.toString();
+    }
+
+    public void setColumnNumber(String sender, int columnNumber) {
+        if (roomMapper.updateColumn(sender, columnNumber) < 1) {
+            roomMapper.insert(new Room(sender, columnNumber));
+        }
     }
 
 
