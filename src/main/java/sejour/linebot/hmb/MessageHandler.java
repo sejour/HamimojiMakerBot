@@ -32,12 +32,20 @@ public class MessageHandler {
             MessageContent messageContent = event.getMessage();
             if (messageContent instanceof TextMessageContent) {
                 String text = ((TextMessageContent) messageContent).getText();
-                String imageUrl = hamimojiMakerService.make(text, event.getSource().getSenderId());
+                String senderId = event.getSource().getSenderId();
 
-                return Arrays.asList(
-                        new ImageMessage(imageUrl, imageUrl),
-                        new TextMessage(imageUrl)
-                );
+                // 列数の設定
+                if (!text.isEmpty() && text.charAt(0) == '#') {
+                    return setColumnNumber(senderId, text);
+                }
+                else {
+                    String imageUrl = hamimojiMakerService.make(text, senderId);
+
+                    return Arrays.asList(
+                            new ImageMessage(imageUrl, imageUrl),
+                            new TextMessage(imageUrl)
+                    );
+                }
             }
 
             return handleDefaultMessageEvent(event);
@@ -61,6 +69,20 @@ public class MessageHandler {
                 new TextMessage(url),
                 new TextMessage("はみ文字に対応している文字を入力してね゛")
         );
+    }
+
+    private List<Message> setColumnNumber(String senderId, String text) throws UserErrorException {
+        try {
+            int columnNumber = Integer.parseInt(text.substring(1));
+            hamimojiMakerService.setColumnNumber(senderId, columnNumber);
+            if (columnNumber < 1) {
+                return Arrays.asList(new TextMessage("改行無しに設定しました。"));
+            }
+            return Arrays.asList(new TextMessage(String.format("1行の長さを%d文字に設定しました。", columnNumber)));
+        }
+        catch (NumberFormatException e) {
+            throw new UserErrorException("#の後は数字を入力してね。1行の長さを変えられるよ！", e);
+        }
     }
 
 }

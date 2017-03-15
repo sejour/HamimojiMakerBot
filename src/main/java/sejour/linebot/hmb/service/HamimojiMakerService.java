@@ -127,5 +127,11 @@ public class HamimojiMakerService {
         return builder.toString();
     }
 
+    public void setColumnNumber(String sender, int columnNumber) {
+        if (roomMapper.updateColumn(sender, columnNumber) < 1) {
+            roomMapper.insert(new Room(sender, columnNumber));
+        }
+    }
+
 
 }
