@@ -82,6 +82,7 @@ public class HamimojiMakerService {
         // リソースが既に存在すれば再利用
         Resource resource = resourceMapper.selectByTextAndColumn(textCode, columnNumber);
         if (resource != null) {
+            resourceMapper.reused(textCode, columnNumber);
             return madeUrlBase + "/" + resource.getName() + IMAGEFILE_EXTENSION;
         }
 
