@@ -43,6 +43,8 @@ public class HamimojiMakerService {
     @Autowired
     private ResourceMapper resourceMapper;
 
+    private final static String IMAGEFILE_EXTENSION = ".gif";
+
     private SecureRandom random;
 
     public HamimojiMakerService() throws NoSuchAlgorithmException {
@@ -74,7 +76,7 @@ public class HamimojiMakerService {
         // リソースが既に存在すれば再利用
         Resource resource = resourceMapper.selectBySenderAndTextAndColumn(sender, textCode, columnNumber);
         if (resource != null) {
-            return resource.getUrl();
+            return madeUrlBase + "/" + resource.getName() + IMAGEFILE_EXTENSION;
         }
 
         String resourceName = generateResourceName();
@@ -82,19 +84,17 @@ public class HamimojiMakerService {
             resourceName = generateResourceName();
         }
 
-        String fileName = resourceName + ".gif";
+        String fileName = resourceName + IMAGEFILE_EXTENSION;
 
         // はみ文字を生成してGIFをストレージに保存
         try (FileOutputStream out = new FileOutputStream(saveDirectory + "/" + fileName)) {
             hamimojiWriter.write(text, out, columnNumber);
         }
 
-        String imageUrl = madeUrlBase + "/" + fileName;
-
         // リソース登録
-        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, columnNumber, imageUrl));
+        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, columnNumber));
 
-        return imageUrl;
+        return madeUrlBase + "/" + fileName;
     }
 
     /**
