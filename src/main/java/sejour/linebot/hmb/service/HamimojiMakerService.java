@@ -63,7 +63,7 @@ public class HamimojiMakerService {
             throw new UserErrorException("文字を入力してください。");
         }
 
-        // カラム数を取得すためにRoomを取り出す
+        // カラム数を取得するためにRoomを取り出す
         Room room = roomMapper.selectBySender(sender);
         if (room == null) {
             room = new Room(sender, defaultColumnNumber);
@@ -71,11 +71,18 @@ public class HamimojiMakerService {
         }
 
         String textCode = getTextCode(text);
+
         int columnNumber = room.getColumnNumber();
+        int textLength = text.codePointCount(0, text.length());
+        // 空白詰め
+        if (textLength < columnNumber || columnNumber < 1) {
+            columnNumber = textLength;
+        }
 
         // リソースが既に存在すれば再利用
-        Resource resource = resourceMapper.selectBySenderAndTextAndColumn(sender, textCode, columnNumber);
+        Resource resource = resourceMapper.selectByTextAndColumn(textCode, columnNumber);
         if (resource != null) {
+            resourceMapper.reused(textCode, columnNumber);
             return madeUrlBase + "/" + resource.getName() + IMAGEFILE_EXTENSION;
         }
 
@@ -92,7 +99,7 @@ public class HamimojiMakerService {
         }
 
         // リソース登録
-        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, columnNumber));
+        resourceMapper.insert(new Resource(resourceName, text, textCode, columnNumber));
 
         return madeUrlBase + "/" + fileName;
     }
