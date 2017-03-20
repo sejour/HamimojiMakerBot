@@ -74,7 +74,7 @@ public class HamimojiMakerService {
         int columnNumber = room.getColumnNumber();
 
         // リソースが既に存在すれば再利用
-        Resource resource = resourceMapper.selectBySenderAndTextAndColumn(sender, textCode, columnNumber);
+        Resource resource = resourceMapper.selectByTextAndColumn(textCode, columnNumber);
         if (resource != null) {
             return madeUrlBase + "/" + resource.getName() + IMAGEFILE_EXTENSION;
         }
@@ -92,7 +92,7 @@ public class HamimojiMakerService {
         }
 
         // リソース登録
-        resourceMapper.insert(new Resource(resourceName, sender, text, textCode, columnNumber));
+        resourceMapper.insert(new Resource(resourceName, text, textCode, columnNumber));
 
         return madeUrlBase + "/" + fileName;
     }
